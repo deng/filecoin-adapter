@@ -8,7 +8,6 @@ import (
 	"github.com/ethereum/go-ethereum/common/math"
 	"github.com/filecoin-project/go-address"
 	"github.com/filecoin-project/specs-actors/actors/builtin"
-	"github.com/filecoin-project/specs-actors/actors/crypto"
 	"github.com/shopspring/decimal"
 	"testing"
 )
