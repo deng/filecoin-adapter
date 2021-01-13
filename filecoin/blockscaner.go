@@ -18,12 +18,14 @@ package filecoin
 import (
 	"errors"
 	"fmt"
-	"github.com/asdine/storm"
-	"github.com/blocktree/openwallet/v2/common"
 	"strings"
 
-	"github.com/blocktree/openwallet/v2/openwallet"
+	"github.com/asdine/storm"
+	"github.com/blocktree/openwallet/v2/common"
+
 	"time"
+
+	"github.com/blocktree/openwallet/v2/openwallet"
 )
 
 const (
@@ -127,7 +129,7 @@ func (bs *FILBlockScanner) ScanBlockTask() {
 
 		//是否已到最新高度
 		if currentHeight >= maxHeight {
-			bs.wm.Log.Std.Info("block scanner has scanned full chain data. Current height: %d", maxHeight)
+			bs.wm.Log.Std.Info("block scanner has scanned full chain data. Current height: %d Max height: %d", currentHeight, maxHeight)
 			break
 		}
 
@@ -143,10 +145,10 @@ func (bs *FILBlockScanner) ScanBlockTask() {
 			bs.wm.Log.Std.Info("block scanner can not get rpc-server block height; unexpected error: %v", err)
 			break
 		}
-		for{
-			if localBlock.Height >= currentHeight{	//如果从rpc获取到的高度，确实等于需要获取的高度
+		for {
+			if localBlock.Height >= currentHeight { //如果从rpc获取到的高度，确实等于需要获取的高度
 				break
-			}else{ //获取到+1的高度，太小了，这样就要获取再加1的高度
+			} else { //获取到+1的高度，太小了，这样就要获取再加1的高度
 				nextHeight := currentHeight + 1
 				bs.wm.Log.Std.Info("block scanner scanning height: %d not found, find next height : %d", currentHeight, nextHeight)
 				currentHeight = nextHeight
@@ -526,19 +528,19 @@ func (bs *FILBlockScanner) extractTransaction(trx *Transaction, result *ExtractR
 	accountID1, ok1 := scanTargetFunc(openwallet.ScanTarget{Address: from, Symbol: bs.wm.Symbol(), BalanceModelType: openwallet.BalanceModelTypeAddress})
 	//订阅地址为交易单中的接收者
 	if ok1 {
-		exitCode, _, err := bs.wm.GetTransactionReceipt( trx.Hash )
+		exitCode, _, err := bs.wm.GetTransactionReceipt(trx.Hash)
 		if err != nil {
-			bs.wm.Log.Std.Error("transaction get receipt error, hash : %v, err : %v", trx.Hash, err )
+			bs.wm.Log.Std.Error("transaction get receipt error, hash : %v, err : %v", trx.Hash, err)
 			return
 		}
-		if exitCode!=OK_ExitCode{
+		if exitCode != OK_ExitCode {
 			//continue
 			trx.Status = "0"
 			//wm.Log.Std.Info("transaction, hash : %v, to: %v, status: %v", itemTransactions[transactinIndex].Hash, itemTransactions[transactinIndex].To, itemTransactions[transactinIndex].Status )
-		}else{
+		} else {
 			trx.Status = "1"
 		}
-		if exitCode==-1{
+		if exitCode == -1 {
 			trx.Status = "-1"
 		}
 
@@ -548,19 +550,19 @@ func (bs *FILBlockScanner) extractTransaction(trx *Transaction, result *ExtractR
 	accountID2, ok2 := scanTargetFunc(openwallet.ScanTarget{Address: to, Symbol: bs.wm.Symbol(), BalanceModelType: openwallet.BalanceModelTypeAddress})
 	//订阅地址为交易单中的接收者
 	if ok2 {
-		exitCode, _, err := bs.wm.GetTransactionReceipt( trx.Hash )
+		exitCode, _, err := bs.wm.GetTransactionReceipt(trx.Hash)
 		if err != nil {
-			bs.wm.Log.Std.Error("transaction get receipt error, hash : %v, err : %v", trx.Hash, err )
+			bs.wm.Log.Std.Error("transaction get receipt error, hash : %v, err : %v", trx.Hash, err)
 			return
 		}
-		if exitCode!=OK_ExitCode{
+		if exitCode != OK_ExitCode {
 			//continue
 			trx.Status = "0"
 			//wm.Log.Std.Info("transaction, hash : %v, to: %v, status: %v", itemTransactions[transactinIndex].Hash, itemTransactions[transactinIndex].To, itemTransactions[transactinIndex].Status )
-		}else{
+		} else {
 			trx.Status = "1"
 		}
-		if exitCode==-1{
+		if exitCode == -1 {
 			trx.Status = "-1"
 		}
 
@@ -580,22 +582,22 @@ func (bs *FILBlockScanner) InitExtractResult(sourceKey string, tx *Transaction, 
 
 	//bs.wm.Log.Std.Info("find_extract_transaction, hash : %v, to: %v, status: %v", tx.Hash, tx.To, tx.Status )
 
-	amount, err := GetRealAmountStr( tx.Value ,bs.wm.Decimal() )
-	if err!=nil {
+	amount, err := GetRealAmountStr(tx.Value, bs.wm.Decimal())
+	if err != nil {
 		bs.wm.Log.Std.Error("transfer tx.Value error, ", err)
 		return
 	}
-	gasDec, err := GetRealAmountDec( tx.Gas ,bs.wm.Decimal() )
-	if err!=nil {
+	gasDec, err := GetRealAmountDec(tx.Gas, bs.wm.Decimal())
+	if err != nil {
 		bs.wm.Log.Std.Error("transfer tx.Gas error, ", err)
 		return
 	}
-	gasPriceDec, err := GetRealAmountDec( tx.GasPrice ,bs.wm.Decimal() )
-	if err!=nil {
+	gasPriceDec, err := GetRealAmountDec(tx.GasPrice, bs.wm.Decimal())
+	if err != nil {
 		bs.wm.Log.Std.Error("transfer tx.GasPrice error, ", err)
 		return
 	}
-	fee := gasDec.Mul( gasPriceDec )
+	fee := gasDec.Mul(gasPriceDec)
 
 	coin := openwallet.Coin{
 		Symbol:     bs.wm.Symbol(),
@@ -857,7 +859,7 @@ func (bs *FILBlockScanner) GetBalanceByAddress(address ...string) ([]*openwallet
 
 	for _, addr := range address {
 
-		balance, err := bs.wm.GetAddrBalance(addr)//bs.wm.getBalance(addr, bs.wm.Config.IgnoreReserve, bs.wm.Config.ReserveAmount)
+		balance, err := bs.wm.GetAddrBalance(addr) //bs.wm.getBalance(addr, bs.wm.Config.IgnoreReserve, bs.wm.Config.ReserveAmount)
 
 		if err != nil {
 			return nil, err
