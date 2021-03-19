@@ -29,7 +29,6 @@ import (
 	"github.com/ethereum/go-ethereum/common/math"
 	"github.com/filecoin-project/go-state-types/crypto"
 	"github.com/filecoin-project/specs-actors/actors/builtin"
-	"github.com/shopspring/decimal"
 	"github.com/tidwall/gjson"
 	"math/big"
 	"strconv"
@@ -224,6 +223,7 @@ func (wm *WalletManager) SetOwBlockTransactions(owBlock *OwBlock) (error){
 	allTransaction := make([]*Transaction, 0)
 
 	transactionCidMap := make(map[string]string) //防止重复用的map
+	transactionNonceMap := make(map[string]string) //防止重复用的map，key value = from_nonce
 	for _, filBlock := range owBlock.TipSet.Blks{
 		itemTransactions, err := wm.GetTransactionInBlock( filBlock.BlockHeaderCid )
 		if err != nil {
@@ -276,10 +276,18 @@ func (wm *WalletManager) SetOwBlockTransactions(owBlock *OwBlock) (error){
 				itemTransactions[transactinIndex].Gas = "0"
 				itemTransactions[transactinIndex].GasPrice = "0"
 
+				nonceKey := transaction.From + "_" + strconv.FormatUint(transaction.Nonce, 10)
+				_, nonceFound := transactionNonceMap[ nonceKey ]
+				if nonceFound {
+					wm.Log.Std.Error("transaction equal transaction, hash : %v", transaction.Hash )
+					continue
+				}
+
 				allTransaction = append(allTransaction, itemTransactions[transactinIndex])
 
 				//加上在map中，防止重复
 				transactionCidMap[ transaction.Hash ] = transaction.Hash
+				transactionNonceMap[ nonceKey ] = nonceKey
 			}
 		}
 	}
@@ -470,18 +478,11 @@ func (wm *WalletManager) SendRawTransaction( message *filecoinTransaction.Messag
 
 	params := []interface{}{ callMsg }
 
-	now1 := int64( time.Now().Nanosecond() )
-
 	result, err := wm.WalletClient.CallWithToken(accessToken, "Filecoin.MpoolPush", params)
 
-	now2 := int64( time.Now().Nanosecond() )
-	cha := decimal.NewFromInt(now2).Sub( decimal.NewFromInt(now1)).Div( decimal.NewFromInt( 1e9 ) )
-
 	if err != nil {
-		wm.Log.Info("send_to_" + message.To.String() + "_" + strconv.FormatUint(message.Nonce, 10) + ", use : " + cha.String() )
 		return "", err
 	}
-	wm.Log.Info("send_to_" + message.To.String() + "_" + strconv.FormatUint(message.Nonce, 10) + ", use : " + cha.String() )
 
 	txHash := gjson.Get(result.Raw, "/").String()
 	return txHash, nil
