@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+
 	"github.com/blocktree/go-owcrypt"
 	"github.com/ethereum/go-ethereum/common/math"
 	"github.com/filecoin-project/go-address"
@@ -39,7 +40,6 @@ func NewMessageFromJSON(j string) (*Message, error) {
 }
 
 func SignTransaction(msgStr string, prikey []byte) ([]byte, error) {
-	fmt.Println("msg :", msgStr, ", prikey : ", hex.EncodeToString(prikey) )
 	msg, err := hex.DecodeString(msgStr)
 	if err != nil || len(msg) == 0 {
 		return nil, errors.New("invalid message to sign")
@@ -71,7 +71,7 @@ func VerifyAndCombineTransaction(emptyTrans, signature string) (string, bool) {
 	cid := message.Cid()
 	bytes := cid.Bytes()
 
-	sig, _ := hex.DecodeString( signature )
+	sig, _ := hex.DecodeString(signature)
 
 	b2sum := blake2b.Sum256(bytes)
 	pubk, err := crypto.EcRecover(b2sum[:], sig)
@@ -84,7 +84,7 @@ func VerifyAndCombineTransaction(emptyTrans, signature string) (string, bool) {
 		return "", false
 	}
 	if message.From != maybeaddr {
-		fmt.Println("maybe : ", maybeaddr.String(), ", from : ", message.From.String() )
+		fmt.Println("maybe : ", maybeaddr.String(), ", from : ", message.From.String())
 		return "", false
 	}
 	return hex.EncodeToString(bytes), true
@@ -115,15 +115,15 @@ func VerifyAndCombineTransaction(emptyTrans, signature string) (string, bool) {
 	//return signned, true
 }
 
-func GetBigIntAmountStr(amountStr string, amountDecimal int32) (string, error){
+func GetBigIntAmountStr(amountStr string, amountDecimal int32) (string, error) {
 	d, err := decimal.NewFromString(amountStr)
-	if err!= nil {
+	if err != nil {
 		return "", err
 	}
 	//atomDec := amountDec.Mul( decimal.)
-	ten := math.BigPow(10, int64(amountDecimal) )
-	w, err := decimal.NewFromString( ten.String() )
-	if err!= nil {
+	ten := math.BigPow(10, int64(amountDecimal))
+	w, err := decimal.NewFromString(ten.String())
+	if err != nil {
 		return "", err
 	}
 

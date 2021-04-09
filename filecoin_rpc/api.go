@@ -17,6 +17,7 @@ package filecoin_rpc
 import (
 	"errors"
 	"fmt"
+
 	"github.com/blocktree/openwallet/v2/log"
 	"github.com/imroc/req"
 	"github.com/tidwall/gjson"
@@ -29,9 +30,9 @@ type Client struct {
 
 func (c *Client) CallWithToken(accessToken, method string, params []interface{}) (*gjson.Result, error) {
 	authHeader := req.Header{
-		"Accept":       "application/json",
-		"Content-Type": "application/json",
-		"Authorization" : "Bearer "+ accessToken,
+		"Accept":        "application/json",
+		"Content-Type":  "application/json",
+		"Authorization": "Bearer " + accessToken,
 	}
 	body := make(map[string]interface{}, 0)
 	body["jsonrpc"] = "2.0"
@@ -107,6 +108,9 @@ func isError(result *gjson.Result) error {
 	if !result.Get("error").IsObject() {
 
 		if !result.Get("result").Exists() {
+
+			fmt.Println("result raw :", result.Raw)
+
 			return fmt.Errorf("Response is empty! ")
 		}
 
