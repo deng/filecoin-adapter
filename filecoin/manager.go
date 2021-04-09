@@ -447,7 +447,7 @@ func (wm *WalletManager) GetTransactionReceipt(txCid string) (int64, int64, erro
 
 	exitCode := int64(-1)
 	gasUsed := int64(-1)
-	
+
 	hasCode := gjson.Get(result.Raw, "ExitCode").Exists()
 	if hasCode {
 		exitCode = gjson.Get(result.Raw, "ExitCode").Int()
