@@ -52,6 +52,10 @@ func (c *Client) CallWithToken(accessToken, method string, params []interface{})
 		return nil, err
 	}
 
+	if r.Response().StatusCode != 200 {
+		return nil, errors.New(r.Response().Status)
+	}
+
 	resp := gjson.ParseBytes(r.Bytes())
 	err = isError(&resp)
 	if err != nil {
@@ -105,11 +109,11 @@ func isError(result *gjson.Result) error {
 		err error
 	)
 
+	fmt.Println("result raw :", result.Raw)
+
 	if !result.Get("error").IsObject() {
 
 		if !result.Get("result").Exists() {
-
-			fmt.Println("result raw :", result.Raw)
 
 			return fmt.Errorf("Response is empty! ")
 		}
