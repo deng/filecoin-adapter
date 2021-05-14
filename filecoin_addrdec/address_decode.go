@@ -10,21 +10,21 @@ import (
 	"strings"
 )
 
-const(
-	MainnetPrefix = "f" // MainnetPrefix is the main network prefix.
-	TestnetPrefix = "t" // TestnetPrefix is the main network prefix.
-	PayloadHashLength = 20 // PayloadHashLength defines the hash length taken over addresses using the Actor and SECP256K1 protocols.
-	BlsPublicKeyBytes = 48 // BlsPublicKeyBytes is the length of a BLS public key
-	ChecksumHashLength = 4 // ChecksumHashLength defines the hash length used for calculating address checksums.
-	EncodeStd = "abcdefghijklmnopqrstuvwxyz234567"
+const (
+	MainnetPrefix      = "f" // MainnetPrefix is the main network prefix.
+	TestnetPrefix      = "t" // TestnetPrefix is the main network prefix.
+	PayloadHashLength  = 20  // PayloadHashLength defines the hash length taken over addresses using the Actor and SECP256K1 protocols.
+	BlsPublicKeyBytes  = 48  // BlsPublicKeyBytes is the length of a BLS public key
+	ChecksumHashLength = 4   // ChecksumHashLength defines the hash length used for calculating address checksums.
+	EncodeStd          = "abcdefghijklmnopqrstuvwxyz234567"
 	Secp256k1_Protocol = byte(0x01)
-	Bls_Protocol = byte(0x03)
+	Bls_Protocol       = byte(0x03)
 )
 
 var (
-	payloadHashConfig = &blake2b.Config{Size: PayloadHashLength}
+	payloadHashConfig  = &blake2b.Config{Size: PayloadHashLength}
 	checksumHashConfig = &blake2b.Config{Size: ChecksumHashLength}
-	addressEncoding = base32.NewEncoding(EncodeStd)
+	addressEncoding    = base32.NewEncoding(EncodeStd)
 )
 
 //AddressDecoderV2
@@ -69,13 +69,17 @@ func (dec *AddressDecoderV2) AddressEncode(publicKey []byte, opts ...interface{}
 // AddressVerify 地址校验
 func (dec *AddressDecoderV2) AddressVerify(address string, opts ...interface{}) bool {
 
-	if len(address)<41 {
+	if len(address) == 41 && strings.HasPrefix(address, dec.GetNtwk()+"1") {
+
+	} else if len(address) == 86 && strings.HasPrefix(address, dec.GetNtwk()+"3") {
+
+	} else {
 		return false
 	}
 
 	prefix := address[:2]
 
-	if prefix != dec.GetNtwk()+fmt.Sprintf("%d", Secp256k1_Protocol) && prefix != dec.GetNtwk()+fmt.Sprintf("%d", Bls_Protocol)  {
+	if prefix != dec.GetNtwk()+fmt.Sprintf("%d", Secp256k1_Protocol) && prefix != dec.GetNtwk()+fmt.Sprintf("%d", Bls_Protocol) {
 		return false
 	}
 
@@ -86,12 +90,12 @@ func (dec *AddressDecoderV2) AddressVerify(address string, opts ...interface{}) 
 		payLoadHashLength = BlsPublicKeyBytes
 	}
 
-	addressEnd, _ := addressEncoding.WithPadding(-1).DecodeString( address[2:] )
+	addressEnd, _ := addressEncoding.WithPadding(-1).DecodeString(address[2:])
 
 	decodeBytes := append([]byte{protocol}, addressEnd[:payLoadHashLength]...)
 	check := owcrypt.Hash(decodeBytes, ChecksumHashLength, owcrypt.HASH_ALG_BLAKE2B)
 
-	if len(addressEnd)<24 || len(check)<4 {
+	if len(addressEnd) < 24 || len(check) < 4 {
 		return false
 	}
 
