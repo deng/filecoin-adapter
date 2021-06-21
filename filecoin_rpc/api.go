@@ -109,7 +109,7 @@ func isError(result *gjson.Result) error {
 		err error
 	)
 
-	fmt.Println("result raw :", result.Raw)
+	//fmt.Println("result raw :", result.Raw)
 
 	if !result.Get("error").IsObject() {
 
