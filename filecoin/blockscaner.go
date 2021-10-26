@@ -18,14 +18,12 @@ package filecoin
 import (
 	"errors"
 	"fmt"
-	"strings"
-
 	"github.com/asdine/storm"
 	"github.com/blocktree/openwallet/v2/common"
-
-	"time"
+	"strings"
 
 	"github.com/blocktree/openwallet/v2/openwallet"
+	"time"
 )
 
 const (
@@ -129,7 +127,9 @@ func (bs *FILBlockScanner) ScanBlockTask() {
 
 		//是否已到最新高度
 		if currentHeight >= maxHeight {
+			// update by derek
 			bs.wm.Log.Std.Info("block scanner has scanned full chain data. Current height: %d Max height: %d", currentHeight, maxHeight)
+			// end update
 			break
 		}
 
@@ -528,21 +528,21 @@ func (bs *FILBlockScanner) extractTransaction(trx *Transaction, result *ExtractR
 	accountID1, ok1 := scanTargetFunc(openwallet.ScanTarget{Address: from, Symbol: bs.wm.Symbol(), BalanceModelType: openwallet.BalanceModelTypeAddress})
 	//订阅地址为交易单中的接收者
 	if ok1 {
-		exitCode, _, err := bs.wm.GetTransactionReceipt(trx.Hash)
-		if err != nil {
-			bs.wm.Log.Std.Error("transaction get receipt error, hash : %v, err : %v", trx.Hash, err)
-			return
-		}
-		if exitCode != OK_ExitCode {
-			//continue
-			trx.Status = "0"
-			//wm.Log.Std.Info("transaction, hash : %v, to: %v, status: %v", itemTransactions[transactinIndex].Hash, itemTransactions[transactinIndex].To, itemTransactions[transactinIndex].Status )
-		} else {
-			trx.Status = "1"
-		}
-		if exitCode == -1 {
-			trx.Status = "-1"
-		}
+		//exitCode, _, err := bs.wm.GetTransactionReceipt( trx.Hash )
+		//if err != nil {
+		//	bs.wm.Log.Std.Error("transaction get receipt error, hash : %v, err : %v", trx.Hash, err )
+		//	return
+		//}
+		//if exitCode!=OK_ExitCode{
+		//	//continue
+		//	trx.Status = "0"
+		//	//wm.Log.Std.Info("transaction, hash : %v, to: %v, status: %v", itemTransactions[transactinIndex].Hash, itemTransactions[transactinIndex].To, itemTransactions[transactinIndex].Status )
+		//}else{
+		//	trx.Status = "1"
+		//}
+		//if exitCode==-1{
+		//	trx.Status = "-1"
+		//}
 
 		bs.InitExtractResult(accountID1, trx, result, 1)
 	}
@@ -550,21 +550,21 @@ func (bs *FILBlockScanner) extractTransaction(trx *Transaction, result *ExtractR
 	accountID2, ok2 := scanTargetFunc(openwallet.ScanTarget{Address: to, Symbol: bs.wm.Symbol(), BalanceModelType: openwallet.BalanceModelTypeAddress})
 	//订阅地址为交易单中的接收者
 	if ok2 {
-		exitCode, _, err := bs.wm.GetTransactionReceipt(trx.Hash)
-		if err != nil {
-			bs.wm.Log.Std.Error("transaction get receipt error, hash : %v, err : %v", trx.Hash, err)
-			return
-		}
-		if exitCode != OK_ExitCode {
-			//continue
-			trx.Status = "0"
-			//wm.Log.Std.Info("transaction, hash : %v, to: %v, status: %v", itemTransactions[transactinIndex].Hash, itemTransactions[transactinIndex].To, itemTransactions[transactinIndex].Status )
-		} else {
-			trx.Status = "1"
-		}
-		if exitCode == -1 {
-			trx.Status = "-1"
-		}
+		//exitCode, _, err := bs.wm.GetTransactionReceipt( trx.Hash )
+		//if err != nil {
+		//	bs.wm.Log.Std.Error("transaction get receipt error, hash : %v, err : %v", trx.Hash, err )
+		//	return
+		//}
+		//if exitCode!=OK_ExitCode{
+		//	//continue
+		//	trx.Status = "0"
+		//	//wm.Log.Std.Info("transaction, hash : %v, to: %v, status: %v", itemTransactions[transactinIndex].Hash, itemTransactions[transactinIndex].To, itemTransactions[transactinIndex].Status )
+		//}else{
+		//	trx.Status = "1"
+		//}
+		//if exitCode==-1{
+		//	trx.Status = "-1"
+		//}
 
 		bs.InitExtractResult(accountID2, trx, result, 2)
 	}
@@ -675,6 +675,7 @@ func (bs *FILBlockScanner) extractTxOutput(trx *Transaction, txExtractData *open
 	txOutput := &openwallet.TxOutPut{}
 	txOutput.Recharge.Sid = openwallet.GenTxOutPutSID(tx.TxID, bs.wm.Symbol(), "", uint64(0))
 	txOutput.Recharge.TxID = tx.TxID
+	//txOutput.Recharge.Address = to + ":" + tx.Amount
 	txOutput.Recharge.Address = to
 	txOutput.Recharge.Coin = coin
 	txOutput.Recharge.Amount = tx.Amount

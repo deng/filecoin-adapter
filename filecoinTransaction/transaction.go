@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-
 	"github.com/blocktree/go-owcrypt"
 	"github.com/ethereum/go-ethereum/common/math"
 	"github.com/filecoin-project/go-address"
@@ -40,6 +39,7 @@ func NewMessageFromJSON(j string) (*Message, error) {
 }
 
 func SignTransaction(msgStr string, prikey []byte) ([]byte, error) {
+	fmt.Println("msg :", msgStr, ", prikey : ", hex.EncodeToString(prikey))
 	msg, err := hex.DecodeString(msgStr)
 	if err != nil || len(msg) == 0 {
 		return nil, errors.New("invalid message to sign")
@@ -88,31 +88,6 @@ func VerifyAndCombineTransaction(emptyTrans, signature string) (string, bool) {
 		return "", false
 	}
 	return hex.EncodeToString(bytes), true
-	//
-	//tp, err := ts.NewTxPayLoad()
-	//if err != nil {
-	//	return "", false
-	//}
-	//
-	//msg, _ := hex.DecodeString(tp.ToBytesString())
-	//
-	//pubkey, _ := hex.DecodeString(ts.SenderPubkey)
-	//
-	//sig, err := hex.DecodeString(signature)
-	//if err != nil || len(sig) != 64{
-	//	return "", false
-	//}
-	//
-	//if owcrypt.SUCCESS != owcrypt.Verify(pubkey, nil, msg, sig, owcrypt.ECC_CURVE_ED25519) {
-	//	return "", false
-	//}
-	//
-	//signned, err := ts.GetSignedTransaction(signature)
-	//if err != nil {
-	//	return "", false
-	//}
-	//
-	//return signned, true
 }
 
 func GetBigIntAmountStr(amountStr string, amountDecimal int32) (string, error) {

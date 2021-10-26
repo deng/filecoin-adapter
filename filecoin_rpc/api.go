@@ -17,7 +17,6 @@ package filecoin_rpc
 import (
 	"errors"
 	"fmt"
-
 	"github.com/blocktree/openwallet/v2/log"
 	"github.com/imroc/req"
 	"github.com/tidwall/gjson"
@@ -51,10 +50,11 @@ func (c *Client) CallWithToken(accessToken, method string, params []interface{})
 	if err != nil {
 		return nil, err
 	}
-
+	// update by derek
 	if r.Response().StatusCode != 200 {
 		return nil, errors.New(r.Response().Status)
 	}
+	// end update
 
 	resp := gjson.ParseBytes(r.Bytes())
 	err = isError(&resp)
@@ -109,12 +109,9 @@ func isError(result *gjson.Result) error {
 		err error
 	)
 
-	//fmt.Println("result raw :", result.Raw)
-
 	if !result.Get("error").IsObject() {
 
 		if !result.Get("result").Exists() {
-
 			return fmt.Errorf("Response is empty! ")
 		}
 

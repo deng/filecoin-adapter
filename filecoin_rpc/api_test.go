@@ -4,22 +4,24 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"testing"
+
 	"github.com/blocktree/filecoin-adapter/filecoinTransaction"
 	"github.com/ethereum/go-ethereum/common/math"
 	"github.com/filecoin-project/go-address"
+	"github.com/filecoin-project/go-state-types/crypto"
 	"github.com/filecoin-project/specs-actors/actors/builtin"
 	"github.com/shopspring/decimal"
-	"testing"
 )
 
 const (
 	//baseURL = "http://127.0.0.1:1234/rpc/v0" //fil_test_local
-	baseURL = "http://47.57.26.144:20031/rpc/v0" //fil_test_remote
+	baseURL   = "http://47.57.26.144:20031/rpc/v0" //fil_test_remote
 	CidLength = 62
 )
 
 func TestGetCall(t *testing.T) {
-	client := Client{BaseURL:baseURL}
+	client := Client{BaseURL: baseURL}
 	method := "Filecoin.ChainHead"
 	//method := "Filecoin.ChainGetTipSetByHeight"
 	//method := "Filecoin.ChainGetBlock"
@@ -51,13 +53,13 @@ func TestGetCall(t *testing.T) {
 	//}
 
 	if result != nil {
-		fmt.Println(method, ", result:", result.String() )
+		fmt.Println(method, ", result:", result.String())
 	}
 	//}
 }
 
 func TestGetCallWithToken(t *testing.T) {
-	client := Client{BaseURL:baseURL}
+	client := Client{BaseURL: baseURL}
 	//method := "Filecoin.ChainHead"
 	//method := "Filecoin.MpoolPush"
 	//method := "Filecoin.ChainGetTipSetByHeight"
@@ -66,7 +68,7 @@ func TestGetCallWithToken(t *testing.T) {
 	//method := "Filecoin.WalletBalance"
 	method := "Filecoin.MpoolPush"
 
-	fromAddr, _ := address.NewFromString("t1xzefzapav6scdwhtt3dzbvihvqn5qx5tajgbzca" )
+	fromAddr, _ := address.NewFromString("t1xzefzapav6scdwhtt3dzbvihvqn5qx5tajgbzca")
 	toAddr, _ := address.NewFromString("t1wh2fhzvb5rcfoleedkupov442qp4hw34kzm52ki")
 
 	//msg := filecoinTransaction.Message{
@@ -80,7 +82,7 @@ func TestGetCallWithToken(t *testing.T) {
 	//}
 
 	valueStr, _ := GetBigIntAmountStr("1.35677", 18)
-	value, _ := filecoinTransaction.BigFromString( valueStr )
+	value, _ := filecoinTransaction.BigFromString(valueStr)
 
 	msg := filecoinTransaction.Message{
 		To:       toAddr,
@@ -103,38 +105,38 @@ func TestGetCallWithToken(t *testing.T) {
 	}
 
 	callMsg := map[string]interface{}{
-		"message" :  msg,
-		"signature" : sig,
+		"message":   msg,
+		"signature": sig,
 	}
 
-	params := []interface{}{ callMsg }
+	params := []interface{}{callMsg}
 
 	//for i := 0; i <= 10; i++ {
-		accessToken := "xxxxx"
-		result, err := client.CallWithToken(accessToken, method, params)
-		if err != nil {
-			t.Logf("Get Call Result return: \n\t%+v\n", err)
-		}
+	accessToken := "xxxxx"
+	result, err := client.CallWithToken(accessToken, method, params)
+	if err != nil {
+		t.Logf("Get Call Result return: \n\t%+v\n", err)
+	}
 
-		//for _, block := range gjson.Get(result.Raw, "Blocks").Array() {
-		//	height := uint64( gjson.Get(block.Raw, "Height").Uint() )
-		//	fmt.Println(", height:", height )
-		//}
+	//for _, block := range gjson.Get(result.Raw, "Blocks").Array() {
+	//	height := uint64( gjson.Get(block.Raw, "Height").Uint() )
+	//	fmt.Println(", height:", height )
+	//}
 
-		if result != nil {
-			fmt.Println(method, ", result:", result.String() )
-		}
+	if result != nil {
+		fmt.Println(method, ", result:", result.String())
+	}
 	//}
 }
 
 // return : []{"/":"ba..."}...
-func GetTipSetKey(hash string) []interface{}{
+func GetTipSetKey(hash string) []interface{} {
 	blockCids := make([]interface{}, 0)
-	for i:=0; i<(len(hash)/CidLength); i++ {
-		blockCidHash := hash[i*CidLength:(i+1)*CidLength]
+	for i := 0; i < (len(hash) / CidLength); i++ {
+		blockCidHash := hash[i*CidLength : (i+1)*CidLength]
 
 		blockCid := map[string]interface{}{
-			"/" : blockCidHash,
+			"/": blockCidHash,
 		}
 
 		blockCids = append(blockCids, blockCid)
@@ -142,15 +144,15 @@ func GetTipSetKey(hash string) []interface{}{
 	return blockCids
 }
 
-func GetBigIntAmountStr(amountStr string, amountDecimal int32) (string, error){
+func GetBigIntAmountStr(amountStr string, amountDecimal int32) (string, error) {
 	d, err := decimal.NewFromString(amountStr)
-	if err!= nil {
+	if err != nil {
 		return "", err
 	}
 	//atomDec := amountDec.Mul( decimal.)
-	ten := math.BigPow(10, int64(amountDecimal) )
-	w, err := decimal.NewFromString( ten.String() )
-	if err!= nil {
+	ten := math.BigPow(10, int64(amountDecimal))
+	w, err := decimal.NewFromString(ten.String())
+	if err != nil {
 		return "", err
 	}
 
